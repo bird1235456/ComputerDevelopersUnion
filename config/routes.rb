@@ -2,6 +2,9 @@
   # The priority is based upon order of creation: first created -> highest priority.
    root 'welcome#home'
    get 'about', to: 'welcome#about'
+
+   resources :articles
+
    # See how all your routes lay out with "rake routes".
 
   # You can have the root of your site routed with "root"
