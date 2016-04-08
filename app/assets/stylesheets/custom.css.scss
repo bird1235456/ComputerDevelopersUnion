@@ -52,8 +52,15 @@ $navbar-default-bg: #1b2677;
   font-size: 1.7em;
   background-color: black;
 }
+.article-action {
+  border-top: 1px solid #eaeaea;
+  padding-top: 5px;
+}
+.description{
+  margin-top: 0;
+  }
 footer {
-  margin-top: 45px;
+  mginargin-top: 45px;
   padding-top: 5px;
   border-top: 1px solid #eaeaea;
   color: #777;
