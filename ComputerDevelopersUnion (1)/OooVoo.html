@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+    <script src="https://code.oovoo.com/webrtc/oovoosdk-2.0.0.min.js"></script>
+    <script type="text/javascript">
+        var conference = null;
+        var conferenceId = "OOVOO_WEB_RTC";
+        var appToken = "PUT HERE APPLICATION TOKEN";
+        var sessionToken = getQSParam("t");
+        var participantId = getQSParam("pid");
+        if (!sessionToken) {
+            //login to get session token
+            participantId = "participant uniqe id";
+            //for example (get random id)
+            participantId = Math.floor(Math.random() * 9999999999) + 1000000000;
+            var redirectUrl = "url to send response with the session token"
+            redirectUrl = location.href + "?pid=" + participantId;
+            ooVoo.API.connect({
+                token: appToken,
+                isSandbox: true,
+                userId: participantId,
+                callbackUrl: redirectUrl
+            });
+        }
+        else {
+            ooVoo.API.init({
+                userToken: sessionToken
+            }, onAPI_init);
+        }
+        function onAPI_init(res) {
+            conference = ooVoo.API.Conference.init({ video: true, audio: true }, onConference_init);
+        }
+        function onConference_init(res) {
+            if (!res.error) {
+                //register to conference events
+                conference.onParticipantJoined = onParticipantJoined;
+                conference.onParticipantLeft = onParticipantLeft;
+                conference.onLocalStreamPublished = onStreamPublished;
+                conference.onConferenceStateChanged = onConferenceStateChanged;
+                conference.onRemoteVideoStateChanged = onRemoteVideoStateChanged
+                conference.setConfig({
+                    videoResolution: ooVoo.API.VideoResolution["HIGH"],
+                    videoFrameRate: new Array(5, 15)
+                }, function (res) {
+                    if (!res.error) {
+                        conference.join(conferenceId, participantId, sessionToken, "participant name", function (result) { });
+                    }
+                });
+            }
+        }
+        function onStreamPublished(stream) {
+            document.getElementById("localVideo").src = URL.createObjectURL(stream.stream);
+        }
+        function onParticipantLeft(evt) {
+            if (evt.uid) {
+                document.getElementById("vid_" + evt.uid).remove();
+            }
+        }
+        function onParticipantJoined(evt) {
+            if (evt.stream && evt.uid != null) {
+                var videoElement = document.createElement("video");
+                videoElement.id = "vid_" + evt.uid;
+                videoElement.src = URL.createObjectURL(evt.stream);
+                videoElement.setAttribute("autoplay", true);
+                document.body.appendChild(videoElement);
+            }
+        }
+        function onConferenceStateChanged(evt) {
+        }
+        function onRemoteVideoStateChanged(evt) {
+        }
+        function getQSParam(name) {
+            name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+            var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+                results = regex.exec(location.search);
+            return results === null ? "" : results[1].replace(/\+/g, " ");
+        }
+    </script>
+</head>
+<body>
+    <video id="localVideo" style="width:50%; height:auto;" autoplay muted></video>
+</body>
+</html>
