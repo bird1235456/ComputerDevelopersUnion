@@ -5,6 +5,11 @@
 
    resources :articles
 
+   get 'signup', to: 'users#new'
+   resources :users, except: [:new]
+
+
+
    # See how all your routes lay out with "rake routes".
 
   # You can have the root of your site routed with "root"
